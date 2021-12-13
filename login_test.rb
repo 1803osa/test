@@ -10,8 +10,6 @@ pass = gets
 
 driver = Selenium::WebDriver.for :edge
 wait = Selenium::WebDriver::Wait.new(:timeout => 10)
-# userID = "ID"
-# pass = "PASS"
 cartItem = "ITEM"
 
 
