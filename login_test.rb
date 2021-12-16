@@ -3,53 +3,74 @@ require 'selenium-webdriver'
 require 'test/unit'
 include Test::Unit::Assertions
 
-puts "Enter Username: "
-userID = gets
-puts "Enter Password: "
-pass = gets
+LOGIN_URL = "https://accounts.bukalapak.com/login?"
+USER = "user"
+PASS = "pass"
+ITEM_TO_ADD = "item"
+LOGIN_BUTTON = "//a[@class= 'sigil-header__nav te-header-login']"
+EMAIL_FIELD = "//div[@class= 'wrapper-input-identity']"
+TO_PASSWORD_FIELD = "//button[@id= 'submit_button']"
+PASSWORD_FIELD = "//div[@class= 'bl-text-field__boxed']"
+LOGIN = "//div[@id= 'btn-login']"
+SEARCH_FIELD = "//input[@name= 'search[keywords]']"
+SEARCH_BUTTON = "//button[@title= 'Cari']"
+CART_BUTTON = "//button[contains(@class = 'c-main-product__action__cart')]"
 
-driver = Selenium::WebDriver.for :edge
-wait = Selenium::WebDriver::Wait.new(:timeout => 10)
-# userID = "ID"
-# pass = "PASS"
-cartItem = "ITEM"
+#navigate function
+def open_website (web_name)
+	@driver = Selenium::WebDriver.for :chrome
+	@driver.navigate.to web_name
+end
 
+#def wait (wait_time)
+#	Selenium::WebDriver::Wait.new(:timeout => wait_time)
+#end
 
-driver.navigate.to "https://www.tokopedia.com/"
+def pathfinder(path, wait_time = 10)
+	@driver = Selenium::WebDriver.for :chrome
+	@wait = Selenium::WebDriver::Wait.new(:timeout => wait_time)
+	@wait.until{@driver.find_element(xpath: path)}
+end
 
-findLogin = wait.until {driver.find_element(xpath: "//button[@data-testid= 'btnHeaderLogin']")}
-findLogin.click
+def click_item(path)
+	pathfinder(path).click
+end   
 
-enterID = wait.until {driver.find_element(xpath: "//input[@data-testid= 'email-phone-input']")}
-enterID.send_keys +userID
+def input_text(text, path)
+	pathfinder(path).send_keys +text
+end
 
-proceedToPass = wait.until {driver.find_element(xpath: "//button[@data-testid= 'email-phone-submit']")}
-proceedToPass.click
+def submit_data(path)
+	pathfinder(path).submit
+end
 
-enterPass = wait.until {driver.find_element(xpath: "//input[@autocomplete= 'current-password']")}
-enterPass.send_keys +pass
+def correct_item()
+	"//a[contains(@title= '#{ITEM_TO_ADD}')]"
+end
 
-login = wait.until {driver.find_element(xpath: "//span[@aria-label= 'login-button']")}
-login.submit
+def automatic_login_test
+	open_website(LOGIN_URL)
+	#click_item(login_button)
+	input_text(USER, EMAIL_FIELD)
+	click_item(TO_PASSWORD_FIELD)
+	input_text(PASS, PASSWORD_FIELD)
+	submit_data(LOGIN)	
+end
 
-verify = wait.until {driver.find_element(xpath: "//img[@src = 'https://ecs7.tokopedia.net/otp/cotp/ICON_EMAIL_NEW.png']")}
-verify.click
+def automatic_add_item_to_cart_test	
+	input_text(ITEM_TO_ADD, SEARCH_FIELD)
+	click_item(SEARCH_BUTTON)
+	click_item(correct_item)
+	click_item(cart_button)
+end
 
-puts "Enter verification code: "
-verificationCode = gets
+def run_test
+	if automatic_login_test !=true
+		puts "Login failed"
+	end
+	if automatic_add_item_to_cart_test != true
+		puts "Add item to cart failed"
+	end
+end
 
-otp = wait.until {driver.find_element(xpath: "//input[@autocomplete = 'one-time-code']")}
-otp.send_keys +verificationCode	
-
-inputItemName = wait.until {driver.find_element(xpath: "//input[@data-unify= 'Search']")}
-inputItemName.send_keys +cartItem
-
-searchItem = wait.until {driver.find_element(xpath: "//button[@aria-label= 'Tombol pencarian']")}
-searchItem.submit
-
-#findCorrectItem = wait.until {driver.find_element(xpath: "//a[contains(@title= 'IPhone 13 Pro Max')]")}
-#findCorrectItem.click
-
-#addToCart = wait.until {driver.find_element(xpath: "//button[@data-testid = 'pdpBtnNormalPrimary']")}
-#addToCart.click
-
+run_test
