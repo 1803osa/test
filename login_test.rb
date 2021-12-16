@@ -3,31 +3,40 @@ require 'selenium-webdriver'
 require 'test/unit'
 include Test::Unit::Assertions
 
-driver = Selenium::WebDriver.for :chrome
-wait = Selenium::WebDriver::Wait.new(:timeout => 10)
-url = "https://www.tokopedia.com/"
+url = "https://accounts.bukalapak.com/login?"
 
 def get_data
 	puts "Enter email: "
-	$user = gets
+	user = gets
 	puts "Enter password: "
-	$pass = gets
+	pass = gets
 	puts "Enter item to add to cart"
-	$item = gets
+	item = gets
 end
 
 #navigate function
-def open_website (webname)
-	driver.navigate.to +webname
+def open_website (web_name)
+	driver = Selenium::WebDriver.for :chrome
+	driver.navigate.to web_name
 end
 
-def path(tagname, attribute, value)
-	xpath: "//#{tagname}[@#{attribute}= '#{value}']"
+def wait (wait_time)
+	Selenium::WebDriver::Wait.new(:timeout => wait_time.to_i)
 end
 
-def pathfinder(path)
-	wait.until{driver.find_element(path)}
+def pathfinder(path, wait_time = 10)
+	driver = Selenium::WebDriver.for :chrome
+	wait(wait_time).until{driver.find_element(xpath: path.to_s)}
 end
+
+#def nav (type, path, text = "")
+#	if type == "click"
+#		pathfinder(path).click
+#	elsif type == "fill"
+#		pathfinder(path).send_keys +text
+#	elsif type == "submit"
+#		pathfinder(path).submit			
+#end
 
 def click_item(path)
 	pathfinder(path).click
@@ -42,48 +51,38 @@ def submit_data(path)
 end
 
 
-def automatic_login_test (webname, email, password)
-	#login_button = xpath: "//button[@data-testid= 'btnHeaderLogin']"
-	login_button = path("button","data-testid","btnHeaderLogin")
-	#email_field = xpath: "//input[@data-testid= 'email-phone-input']")
-	email_field = path("input","data-testid","email-phone-input")
-	#enter_password = xpath: "//button[@data-testid= 'email-phone-submit']")
-	enter_password = path("button","data-testid","email-phone-submit")
-	#password_field = xpath: "//input[@autocomplete= 'current-password']")
-	password_field = path("input","autocomplete","current-password")
-	#login = xpath: "//span[@aria-label= 'login-button']"
-	login = path("span","aria-label","login-button")
+def automatic_login_test (web_name, email, password)
+	login_button = "//a[@class= 'sigil-header__nav te-header-login']"
+	#login_button = path("button","id","submit_button")
+	email_field = "//div[@dclass= 'bl-text-field__boxed']"
+	#email_field = path("div","class","bl-text-field__boxed")
+	to_password_field = "//button[@id= 'submit_button']"
+	#to_password_field = path("button","id","submit_button")
+	password_field = "//div[@class= 'bl-text-field__boxed']"
+	#password_field = path("div","class","bl-text-field__boxed")
+	login = "//div[@id= 'btn-login']"
+	#login = path("div","id","btn-login")
 
-	open_website(webname)
-	click_item(login_button)
+	open_website(web_name)
+	#click_item(login_button)
 	input_text(email, email_field)
-	click_item(enter_password)
+	click_item(to_password_field)
 	input_text(password, password_field)
 	submit_data(login)	
 end
 
 def automatic_add_item_to_cart_test (item_to_add)
-	search_field = xpath: "//input[@data-unify= 'Search']"
-	search_button = xpath: "//button[@aria-label= 'Tombol pencarian']"
-	correct_item = xpath: "//a[contains(@title= '#{item_to_add}')]"
-	cart_button = xpath: "//button[@data-testid = 'pdpBtnNormalPrimary']"
+	search_field = "//input[@name= 'search[keywords]']"
+	search_button = "//button[@title= 'Cari']"
+	correct_item = "//a[contains(@title= '#{item_to_add}')]"
+	cart_button = "//button[contains(@class = 'c-main-product__action__cart')]"
 	
 	input_text(item_to_add, search_field)
 	click_item(search_button)
-	click_item(correct_item)
-	click_item(cart_button)
-end
-begin
-	automatic_login_test($url, $user, $pass)
-	automatic_add_item_to_cart_test($item)
-rescue StandardError => e	
+	#click_item(correct_item)
+	#click_item(cart_button)
 end
 
-# verify = wait.until {driver.find_element(xpath: "//img[@src = 'https://ecs7.tokopedia.net/otp/cotp/ICON_EMAIL_NEW.png']")}
-# verify.click
-
-# puts "Enter verification code: "
-# verificationCode = gets
-
-# otp = wait.until {driver.find_element(xpath: "//input[@autocomplete = 'one-time-code']")}
-# otp.send_keys +verificationCode	
+#get_data
+automatic_login_test(url, "user", "pass")
+automatic_add_item_to_cart_test("item")
