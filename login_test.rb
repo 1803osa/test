@@ -16,7 +16,6 @@ SEARCH_FIELD = "//input[@name= 'search[keywords]']"
 SEARCH_BUTTON = "//button[@title= 'Cari']"
 CART_BUTTON = "//button[contains(@class = 'c-main-product__action__cart')]"
 
-#navigate function
 def open_website (web_name)
 	@driver = Selenium::WebDriver.for :chrome
 	@driver.navigate.to web_name
